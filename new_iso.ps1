@@ -36,18 +36,17 @@ $drive = Get-DiskImage $mountResult.ImagePath | Get-Volume
 $letter = $drive.DriveLetter + ":\"
 
 # Define the array of file paths
-$paths = @{}
-$paths[$OSName] = @()
+$paths = @()
 
 # If this is a Windows OS, format like Windows file paths
 if ($OSType -imatch "windows") {
     # List contents and put it in an array
-    foreach ($filePath in (Get-ChildItem $letter -Recurse -File | % { $_.FullName })) {
+    foreach ($filePath in (Get-ChildItem $letter -Include "*.exe","*.dll" -Recurse -File | % { $_.FullName })) {
         # Replace the drive letter assigned to the mounted drive with C:\
         $windowsPath = (($filePath -replace ($drive.DriveLetter+":\\"), "C:\"))
 
         # Add filepath string to array of paths array under the OS name
-        $paths[$OSName] += ($windowsPath)
+        $paths += ($windowsPath)
     }
 }
 # If this is anything other than Windows, format like Unix file paths
@@ -58,22 +57,13 @@ else {
         $unixPath = (($filePath -replace "\\","/") -replace ":","").Trim("/").TrimStart($drive.DriveLetter).ToLower()
 
         # Add filepath string to array of paths array under the OS name
-        $paths[$OSName] += ($unixPath)
+        $paths += ($unixPath)
     }
 }
 
-$jsonFile = ".\paths.json"
-if (Test-Path -Path $jsonFile -PathType Leaf) {
-    $json = Get-Content $jsonFile | Out-String | ConvertFrom-Json
+$pathsFile = ".\file_paths_iso.txt"
 
-    $json | Add-Member -Type NoteProperty -Name $OSName -Value $paths[$OSName]
-
-    $json | ConvertTo-Json | Set-Content $jsonFile
-
-} else {
-    ConvertTo-Json $paths >> paths.json
-
-}
+$paths | Out-File -Append $pathsFile
 
 # Dismount the ISO
 Dismount-DiskImage -ImagePath "$iso" | Out-Null
