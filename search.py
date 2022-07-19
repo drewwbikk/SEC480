@@ -1,5 +1,6 @@
 import argparse
 import subprocess, sys
+import sqlite3
 
 # Parse arguments
 parser = argparse.ArgumentParser(description="Search for executable filename and return known good paths.",formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -12,10 +13,27 @@ fileName = config['filename']
 
 print("Searching for " + fileName + " for " + osName + "...")
 
-# Open file with paths, and search for the file name. Print the path of the file. 
-# The plan is to do this in SQL later on, but simple search to test ingest_files.py works correctly.
-with open('file_paths.txt', 'r') as inF:
-    for line in inF:
-        if fileName in line:
-            print(line)
-            
+# Open the database and create a cursor
+db_file = r'C:\Users\Drew\Desktop\ISOs\week6\filepaths.db'
+con = sqlite3.connect(db_file)
+cur = con.cursor()
+
+# Create SQL query to search for file
+sql = "SELECT * FROM file_paths WHERE file_name LIKE ? AND os_name LIKE ?;"
+
+# Format values for query for searching pattern
+fileName = "%" + fileName + "%"
+osName = "%" + osName + "%"
+
+# Create values to put in query
+val = (fileName, osName)
+
+# Execute query with values
+out = cur.execute(sql, val)
+
+# Print the OS and the file path from results
+for row in out:
+    print(row[1] + ": " + row[2])
+
+# Close the db    
+con.close()

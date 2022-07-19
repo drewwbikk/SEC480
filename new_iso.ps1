@@ -63,7 +63,7 @@ else {
 
 $pathsFile = ".\file_paths_iso.txt"
 
-$paths | Out-File -Append $pathsFile
+$paths | Out-File -Append $pathsFile -Encoding ascii
 
 # Dismount the ISO
 Dismount-DiskImage -ImagePath "$iso" | Out-Null
