@@ -1,0 +1,6 @@
+This archive includes:
+example_unix_filepath_list.csv - What a CSV output of any Unix-type OS should look like.
+example_windows_filepath_list.csv - What a CSV output of any Windows-type OS should look like.
+example_sql_database.db - What a populated DB should look like (includes data from the two included CSVs).
+
+These files can be used for testing or as a reference.
